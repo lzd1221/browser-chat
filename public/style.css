@@ -146,9 +146,12 @@ form .ipt { margin-bottom: 10px; }
 }
 .back-btn {
   display: none; border: none; background: none; cursor: pointer;
-  font-size: 26px; line-height: 1; color: var(--text); padding: 0 2px;
+  align-items: center; gap: 2px; padding: 4px 10px 4px 0;
+  font-size: 15px; font-weight: 600; color: var(--text);
+  min-height: 40px; min-width: 44px; text-align: left;
 }
-.back-btn:active { opacity: .6; }
+.back-btn:hover { color: var(--accent); }
+.back-btn:active { opacity: .55; }
 .chat-head-meta { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .chat-head-meta b { font-size: 15px; }
 .online-tag { color: #2bb673; font-size: 12px; white-space: nowrap; }
@@ -220,8 +223,8 @@ form .ipt { margin-bottom: 10px; }
 ::-webkit-scrollbar-thumb { background: #ccd3dc; border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ---------- 窄屏 / 手机适配：列表与聊天全屏切换 ---------- */
-@media (max-width: 720px) {
+/* ---------- 窄屏 / 手机适配：列表与聊天全屏切换（<=900px） ---------- */
+@media (max-width: 900px) {
   .app { position: relative; overflow: hidden; }
   .sidebar { width: 100%; min-width: 0; border-right: none; }
   .chat { position: absolute; inset: 0; width: 100%; }

@@ -73,9 +73,9 @@ function showApp() {
   syncView();
 }
 
-/* 窄屏(<=720px)下：好友列表与聊天面板全屏切换，body.chat-open 时只显示聊天 */
+/* 窄屏(<=900px)下：好友列表与聊天面板全屏切换，body.chat-open 时只显示聊天 */
 function syncView() {
-  const narrow = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
+  const narrow = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
   document.body.classList.toggle('chat-open', !!(narrow && state.activeId));
 }
 
@@ -563,7 +563,7 @@ function forceLogout() {
 // 窗口在窄/宽屏间切换时刷新布局模式
 (function watchViewport() {
   if (!window.matchMedia) return;
-  const mq = window.matchMedia('(max-width: 720px)');
+  const mq = window.matchMedia('(max-width: 900px)');
   const fn = () => syncView();
   if (mq.addEventListener) mq.addEventListener('change', fn);
   else if (mq.addListener) mq.addListener(fn);
