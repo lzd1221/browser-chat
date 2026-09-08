@@ -79,6 +79,7 @@
           <span id="chatId" class="side-id"></span>
         </div>
         <span id="chatOnline" class="online-tag"></span>
+        <button id="btnRemark" class="btn-ghost" title="备注这个人是谁">✎ 备注</button>
       </header>
 
       <div id="msgList" class="msg-list"></div>
@@ -98,6 +99,19 @@
       <p class="muted">请输入对方 ID 后回车搜索</p>
     </div>
     <button id="btnCloseModal" class="btn-ghost">关闭</button>
+  </div>
+</div>
+
+<!-- ===== 备注弹层 ===== -->
+<div id="remarkModal" class="modal hidden">
+  <div class="modal-card">
+    <h3 class="modal-title">设置备注</h3>
+    <p id="remarkTarget" class="muted modal-sub"></p>
+    <input id="remarkInput" class="ipt" maxlength="20" placeholder="给对方起个名字，留空保存即清除">
+    <div class="modal-actions">
+      <button id="btnRemarkClear" class="btn-ghost">清除备注</button>
+      <button id="btnRemarkSave" class="btn-primary btn-primary-sm">保存</button>
+    </div>
   </div>
 </div>
 

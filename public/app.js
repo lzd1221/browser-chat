@@ -271,9 +271,10 @@ async function respond(from, accept) {
 }
 
 function friendEl(f) {
+  const name = f.remark || f.nickname;
   const item = document.createElement('div');
   item.className = 'friend-item' + (f.id === state.activeId ? ' active' : '');
-  item.append(avatarEl(f.id, f.nickname));
+  item.append(avatarEl(f.id, name));
   const main = document.createElement('div');
   main.className = 'f-main';
   const l1 = document.createElement('div');
@@ -283,7 +284,7 @@ function friendEl(f) {
   const dot = document.createElement('span');
   dot.className = 'dot ' + (f.online ? 'on' : 'off');
   dot.title = f.online ? '在线' : '离线';
-  nick.append(dot, document.createTextNode(f.nickname));
+  nick.append(dot, document.createTextNode(name));
   const time = document.createElement('span');
   time.className = 'f-time';
   time.textContent = f.lastAt ? fmtTime(f.lastAt) : '';
@@ -321,9 +322,7 @@ async function openChat(id, keepScroll) {
   renderFriends();
   $('#chatEmpty').classList.add('hidden');
   $('#chatPanel').classList.remove('hidden');
-  $('#chatNick').textContent = f.nickname;
-  $('#chatId').textContent = 'ID: ' + f.id;
-  setAvatar($('#chatAvatar'), f.id, f.nickname);
+  updateChatHeadInfo(f);
   updateChatHeader();
   syncView();
 
@@ -348,6 +347,14 @@ function updateChatHeader() {
   tag.className = 'online-tag' + (f.online ? '' : ' offline');
 }
 
+/* 聊天头部显示名：备注优先；有备注时补充原始昵称 */
+function updateChatHeadInfo(f) {
+  const name = f.remark || f.nickname;
+  $('#chatNick').textContent = name;
+  $('#chatId').textContent = 'ID: ' + f.id + (f.remark && f.remark !== f.nickname ? ' · 昵称 ' + f.nickname : '');
+  setAvatar($('#chatAvatar'), f.id, name);
+}
+
 function renderMessages(messages, f) {
   const box = $('#msgList');
   const frag = document.createDocumentFragment();
@@ -365,7 +372,7 @@ function renderMessages(messages, f) {
       const isLast = i === run.msgs.length - 1;
       const row = document.createElement('div');
       row.className = 'msg-row ' + (run.mine ? 'mine' : 'friend');
-      if (!run.mine && isLast) row.append(avatarEl(m.from, f.nickname));
+      if (!run.mine && isLast) row.append(avatarEl(m.from, f.remark || f.nickname));
       const meta = document.createElement('div');
       meta.className = 'msg-meta';
       const bub = document.createElement('div');
@@ -507,6 +514,39 @@ function showSearchModal() { $('#searchModal').classList.remove('hidden'); }
 function closeSearchModal() { $('#searchModal').classList.add('hidden'); }
 $('#btnCloseModal').onclick = closeSearchModal;
 $('#searchModal').addEventListener('click', (e) => { if (e.target === $('#searchModal')) closeSearchModal(); });
+
+/* ---------- 好友备注 ---------- */
+function openRemarkModal() {
+  if (!state.activeId) return;
+  const f = (state.contacts.friends || []).find(x => x.id === state.activeId);
+  if (!f) return;
+  $('#remarkTarget').textContent = f.id + (f.remark ? '（当前：' + f.remark + '）' : '（当前无备注）');
+  $('#remarkInput').value = f.remark || '';
+  $('#remarkModal').classList.remove('hidden');
+  $('#remarkInput').focus();
+}
+function closeRemarkModal() { $('#remarkModal').classList.add('hidden'); }
+async function saveRemark(clear) {
+  const fid = state.activeId;
+  if (!fid) return;
+  const remark = clear ? '' : $('#remarkInput').value.trim();
+  try {
+    await api('/api/friends/remark', { method: 'POST', body: JSON.stringify({ to: fid, remark }) });
+    const f = (state.contacts.friends || []).find(x => x.id === fid);
+    if (f) {
+      f.remark = remark;
+      if (state.activeId === fid) updateChatHeadInfo(f);
+    }
+    renderFriends();
+    closeRemarkModal();
+    toast(remark ? '备注已保存' : '已清除备注');
+  } catch (err) { toast(err.message); }
+}
+$('#btnRemark').onclick = openRemarkModal;
+$('#btnRemarkSave').onclick = () => saveRemark(false);
+$('#btnRemarkClear').onclick = () => saveRemark(true);
+$('#remarkModal').addEventListener('click', (e) => { if (e.target === $('#remarkModal')) closeRemarkModal(); });
+$('#remarkInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveRemark(false); } });
 
 /* ---------- 启动 ---------- */
 function forceLogout() {

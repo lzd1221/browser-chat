@@ -83,6 +83,18 @@ function waitWsMsg(ws, type, timeout = 4000) {
   r = await post('/api/messages', { to: 'ccc003', text: 'hi' }, ta);
   ok('非好友发消息被拒(403)', r.status === 403, r);
 
+  console.log('== 4. 好友备注 ==');
+  r = await post('/api/friends/remark', { to: 'bbb002', remark: '我的同事小红' }, ta);
+  ok('A 给 B 设置备注', r.status === 200 && r.data.remark === '我的同事小红', r);
+  r = await api('/api/contacts', {}, ta);
+  ok('A 联系人中 B 的备注生效', (r.data.friends.find(f => f.id === 'bbb002') || {}).remark === '我的同事小红', r.data);
+  r = await post('/api/friends/remark', { to: 'ccc003', remark: 'hack' }, ta);
+  ok('给非好友设置备注被拒(403)', r.status === 403, r);
+  r = await post('/api/friends/remark', { to: 'bbb002', remark: '' }, ta);
+  ok('清空备注成功', r.status === 200, r);
+  r = await api('/api/contacts', {}, ta);
+  ok('A 联系人中 B 的备注已清除', (r.data.friends.find(f => f.id === 'bbb002') || {}).remark === '', r.data);
+
   console.log('== 5. 已读回执 ==');
   const wsB = new (require('ws'))(WS + '/ws?token=' + tb);
   await new Promise((res, rej) => { wsB.on('open', res); wsB.on('error', rej); });

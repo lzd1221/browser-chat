@@ -226,6 +226,7 @@ function contactsOf(me) {
       unread,
       lastText: last ? last.text : '',
       lastAt: last ? last.at : 0,
+      remark: (me.remarks || {})[fid] || '',
     });
   }
   friends.sort((a, b) => (b.lastAt || b.createdAt || 0) - (a.lastAt || a.createdAt || 0));
@@ -273,7 +274,7 @@ function api(req, res, pathname) {
       if (!nickname || nickname.length > MAX_NICK) return sendJson(res, 400, { error: '昵称不能为空且不超过 20 字' });
       if (password.length < MIN_PW) return sendJson(res, 400, { error: '密码至少 4 位' });
       if (db.users[id]) return sendJson(res, 409, { error: '该 ID 已被注册，请换一个' });
-      const u = { id, nickname, pass: hashPw(password), createdAt: Date.now(), friends: [], requests: [] };
+      const u = { id, nickname, pass: hashPw(password), createdAt: Date.now(), friends: [], requests: [], remarks: {} };
       db.users[id] = u;
       scheduleSave();
       return sendJson(res, 200, { token: issueToken(id), user: publicUser(u) });
@@ -354,6 +355,21 @@ function api(req, res, pathname) {
       }
       scheduleSave();
       return sendJson(res, 200, { ok: true });
+    });
+  }
+
+  /* 设置好友备注（仅自己可见；备注为空则清除） */
+  if (pathname === '/api/friends/remark' && method === 'POST') {
+    return readBody(req, (b) => {
+      if (!b) return sendJson(res, 400, { error: '请求体无效' });
+      const to = String(b.to || '').trim();
+      if (!to || !(me.friends || []).includes(to)) return sendJson(res, 403, { error: '仅好友可设置备注' });
+      const remark = String(b.remark || '').trim().slice(0, 20);
+      me.remarks = me.remarks || {};
+      if (remark) me.remarks[to] = remark;
+      else delete me.remarks[to];
+      scheduleSave();
+      return sendJson(res, 200, { ok: true, remark });
     });
   }
 

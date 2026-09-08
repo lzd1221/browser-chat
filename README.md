@@ -6,6 +6,7 @@
 - 好友请求制：搜到对方 ID → 发请求 → 对方同意后即可聊天
 - 实时收发消息（WebSocket 推送）、在线状态、未读数、消息持久化
 - **已读回执**：自己发出的消息气泡下实时显示「未读/已读」，对方打开聊天读取后自动更新
+- **好友备注**：可给每个好友设置备注名（仅自己可见），列表与聊天头部优先显示备注
 - 界面简洁：单页面，登录 / 注册 + 好友列表 + 聊天面板
 - 技术栈：Node.js 原生 HTTP + `ws` + JSON 文件存储，**无构建步骤**
 
@@ -62,6 +63,7 @@ journalctl -u browser-chat -f       # 查看日志
 | GET | `/api/contacts` | 好友列表（在线/未读/最后消息）+ 收到的好友请求 |
 | POST | `/api/friends/request` | 发送好友请求 `{to}` |
 | POST | `/api/friends/respond` | 处理请求 `{from, accept}` |
+| POST | `/api/friends/remark` | 设置好友备注 `{to, remark}`（remark 空则清除） |
 | GET | `/api/messages?with=<id>` | 拉取聊天记录（自动标记已读） |
 | POST | `/api/messages` | 发送消息 `{to, text}` |
 | POST | `/api/read` | 标记与某好友的消息已读 `{with}` |

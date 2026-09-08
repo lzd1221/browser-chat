@@ -196,6 +196,11 @@ form .ipt { margin-bottom: 10px; }
   background: #fff; border-radius: 12px; padding: 18px; width: 320px; max-width: 100%;
   box-shadow: 0 12px 40px rgba(0,0,0,.18);
 }
+.modal-title { font-size: 16px; margin-bottom: 4px; }
+.modal-sub { font-size: 12px; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.modal-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; }
+.modal-actions .btn-primary { width: auto; flex: 1; padding: 9px; }
+.btn-primary-sm { letter-spacing: 2px; }
 .search-result { display: flex; flex-direction: column; gap: 12px; align-items: center; padding: 8px 0 16px; text-align: center; }
 .search-user { display: flex; align-items: center; gap: 12px; text-align: left; }
 .search-user .su-meta { display: flex; flex-direction: column; }
