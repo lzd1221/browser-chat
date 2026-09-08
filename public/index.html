@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browser Chat · 简洁聊天</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f6fed'/%3E%3Cpath d='M8 10h16v8a6 6 0 0 1-6 6h-5l-4 3v-3a8 8 0 0 1-1-6V10z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== 登录 / 注册 ===== -->
+<div id="authView" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">💬</div>
+    <h1 class="auth-title">Browser Chat</h1>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="auth-tab active">登录</button>
+      <button id="tabRegister" class="auth-tab">注册</button>
+    </div>
+
+    <form id="formLogin" autocomplete="off">
+      <input id="loginId" class="ipt" placeholder="ID（登录用）" maxlength="20" required>
+      <input id="loginPw" class="ipt" type="password" placeholder="密码" maxlength="64" required>
+      <button class="btn-primary" type="submit">登 录</button>
+    </form>
+
+    <form id="formRegister" class="hidden" autocomplete="off">
+      <input id="regId" class="ipt" placeholder="设置 ID（唯一，字母/数字/下划线，3-20位）" maxlength="20" required>
+      <input id="regNick" class="ipt" placeholder="昵称（可重名，最多 20 字）" maxlength="20" required>
+      <input id="regPw" class="ipt" type="password" placeholder="密码（至少 4 位）" maxlength="64" required>
+      <input id="regPw2" class="ipt" type="password" placeholder="确认密码" maxlength="64" required>
+      <button class="btn-primary" type="submit">注册并登录</button>
+    </form>
+    <p id="authError" class="auth-error"></p>
+  </div>
+</div>
+
+<!-- ===== 主界面 ===== -->
+<div id="appView" class="app hidden">
+  <aside class="sidebar">
+    <div class="side-head">
+      <div class="side-user">
+        <span id="meAvatar" class="avatar"></span>
+        <div class="side-user-meta">
+          <b id="meNick"></b>
+          <span class="side-id" id="meId"></span>
+        </div>
+      </div>
+      <button id="btnLogout" class="btn-ghost" title="退出登录">退出</button>
+    </div>
+
+    <div class="search-row">
+      <input id="searchInput" class="ipt ipt-sm" placeholder="搜索好友 ID 加好友" maxlength="20">
+    </div>
+
+    <div id="reqSection" class="req-section hidden">
+      <div class="sec-label">新的好友请求 <span id="reqCount" class="badge hidden"></span></div>
+      <div id="reqList"></div>
+    </div>
+
+    <div class="sec-label">好友</div>
+    <div id="friendList" class="friend-list"></div>
+    <div id="emptyHint" class="empty-hint hidden">还没有好友<br>在上方输入对方的 ID 搜索添加</div>
+  </aside>
+
+  <section class="chat">
+    <div id="chatEmpty" class="chat-empty">
+      <div class="chat-empty-icon">💬</div>
+      <p>选择左侧好友开始聊天</p>
+    </div>
+
+    <div id="chatPanel" class="hidden">
+      <header class="chat-head">
+        <span id="chatAvatar" class="avatar avatar-sm"></span>
+        <div class="chat-head-meta">
+          <b id="chatNick"></b>
+          <span id="chatId" class="side-id"></span>
+        </div>
+        <span id="chatOnline" class="online-tag"></span>
+      </header>
+
+      <div id="msgList" class="msg-list"></div>
+
+      <div class="chat-input-bar">
+        <textarea id="msgInput" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行" maxlength="2000"></textarea>
+        <button id="btnSend" class="btn-primary btn-send">发送</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== 搜索结果弹层 ===== -->
+<div id="searchModal" class="modal hidden">
+  <div class="modal-card">
+    <div id="searchResult" class="search-result">
+      <p class="muted">请输入对方 ID 后回车搜索</p>
+    </div>
+    <button id="btnCloseModal" class="btn-ghost">关闭</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

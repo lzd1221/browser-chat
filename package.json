@@ -1,0 +1,16 @@
+{
+  "name": "browser-chat",
+  "version": "1.0.0",
+  "description": "简洁浏览器聊天应用：账号注册、唯一ID、搜索ID加好友、实时聊天（Node.js + WebSocket + JSON 持久化，零构建）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "license": "MIT"
+}
