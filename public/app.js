@@ -123,11 +123,12 @@ $('#btnLogout').onclick = () => {
   localStorage.removeItem('bc_token');
   if (state.ws) { try { state.ws.close(); } catch {} state.ws = null; }
   state.me = null;
-  state.activeId = null;
+  resetChatUI();
   showAuth();
 };
 
 function enter(token, user) {
+  resetChatUI(); // 切换账号时先清空上一账号的界面状态
   state.token = token;
   state.me = user;
   localStorage.setItem('bc_token', token);
@@ -137,6 +138,28 @@ function enter(token, user) {
   showApp();
   connectWs();
   loadContacts();
+}
+
+/* 清空聊天相关界面与状态（登出/切换账号时调用，防止上一账号数据残留） */
+function resetChatUI() {
+  state.activeId = null;
+  state.contacts = { friends: [], requests: [] };
+  state.avatars = {};
+  $('#msgList').replaceChildren();
+  $('#chatNick').textContent = '';
+  $('#chatId').textContent = '';
+  const ca = $('#chatAvatar');
+  ca.style.background = '';
+  ca.textContent = '';
+  $('#chatOnline').textContent = '';
+  $('#chatPanel').classList.add('hidden');
+  $('#chatEmpty').classList.remove('hidden');
+  $('#searchInput').value = '';
+  const sr = $('#searchResult');
+  if (sr) sr.replaceChildren();
+  renderRequests();
+  renderFriends();
+  syncView();
 }
 
 /* ---------- WebSocket ---------- */
@@ -555,8 +578,9 @@ function forceLogout() {
   toast('登录已过期，请重新登录');
   state.token = '';
   localStorage.removeItem('bc_token');
+  if (state.ws) { try { state.ws.close(); } catch {} state.ws = null; }
   state.me = null;
-  state.activeId = null;
+  resetChatUI();
   showAuth();
 }
 
