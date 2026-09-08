@@ -598,12 +598,22 @@ function forceLogout() {
    - 若 iOS 为显示输入框擅自滚动页面，立刻拉回顶部，避免聊天记录被滚走变空白 */
 function fitMobileViewport() {
   const app = $('#appView');
-  if (!app) return;
+  const auth = $('#authView');
   const narrow = window.matchMedia('(max-width: 900px)').matches;
-  if (!narrow) { app.style.height = ''; return; }
+  if (!narrow) {
+    if (app) app.style.height = '';
+    if (auth) auth.style.height = '';
+    return;
+  }
+  if (!app) return;
   const vv = window.visualViewport;
   const h = vv ? vv.height : window.innerHeight;
-  app.style.height = Math.max(Math.round(h), 240) + 'px';
+  const px = Math.max(Math.round(h), 240) + 'px';
+  app.style.height = px;
+
+  // 登录/注册页同样是可滚动容器：高度贴住可见区(键盘弹出时 = 键盘上方)
+  if (auth) auth.style.height = px;
+
   // 任何滚动偏移都会把上方内容推出屏幕 → 强制归零
   if (window.scrollY > 0) { try { window.scrollTo(0, 0); } catch {} }
   const de = document.documentElement, b = document.body;
@@ -621,12 +631,26 @@ function fitMobileViewport() {
   }
   window.addEventListener('resize', onVv);
   window.addEventListener('orientationchange', () => setTimeout(onVv, 200));
-  // 键盘弹起/收起：立即适配一次，动画结束后再校正一次
+
+  // 键盘弹起/收起：立即适配一次，动画结束后再校正一次，并把聚焦的输入框滚到可见区
   document.addEventListener('focusin', (e) => {
-    if (e.target && e.target.id === 'msgInput') { fitMobileViewport(); setTimeout(fitMobileViewport, 350); }
+    const t = e.target;
+    if (!t || typeof t.closest !== 'function') return;
+    const isText = t.id === 'msgInput' || t.closest('#authView');
+    if (!isText) return;
+    fitMobileViewport();
+    setTimeout(fitMobileViewport, 350);
+    setTimeout(() => {
+      try { t.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
+    }, 450);
   });
   document.addEventListener('focusout', (e) => {
-    if (e.target && e.target.id === 'msgInput') { setTimeout(fitMobileViewport, 100); setTimeout(fitMobileViewport, 400); }
+    const t = e.target;
+    if (!t) return;
+    if (t.id === 'msgInput' || (t.closest && t.closest('#authView'))) {
+      setTimeout(fitMobileViewport, 100);
+      setTimeout(fitMobileViewport, 400);
+    }
   });
 })();
 

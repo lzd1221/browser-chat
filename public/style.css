@@ -238,6 +238,15 @@ form .ipt { margin-bottom: 10px; }
   html, body { overflow: hidden; overscroll-behavior: none; }
   /* 整个应用钉死在浏览器可见区域顶部：不会被键盘弹起引发的滚动推走 */
   .app { position: fixed; top: 0; left: 0; right: 0; overflow: hidden; }
+
+  /* 登录/注册页：独立滚动容器（键盘弹起时输入框可被顶到可见区） */
+  .auth-wrap {
+    display: block;
+    height: 100vh; height: 100dvh;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 32px 16px 48px;
+  }
+  .auth-card { margin: 0 auto; box-shadow: none; }
   .friend-list, .msg-list { -webkit-overflow-scrolling: touch; }
   .sidebar { width: 100%; min-width: 0; border-right: none; }
   .chat { position: absolute; inset: 0; width: 100%; }
