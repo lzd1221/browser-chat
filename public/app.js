@@ -65,10 +65,18 @@ function toast(msg, ms = 2200) {
 function showAuth() {
   $('#appView').classList.add('hidden');
   $('#authView').classList.remove('hidden');
+  syncView();
 }
 function showApp() {
   $('#authView').classList.add('hidden');
   $('#appView').classList.remove('hidden');
+  syncView();
+}
+
+/* 窄屏(<=720px)下：好友列表与聊天面板全屏切换，body.chat-open 时只显示聊天 */
+function syncView() {
+  const narrow = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
+  document.body.classList.toggle('chat-open', !!(narrow && state.activeId));
 }
 
 function setAuthError(msg) { $('#authError').textContent = msg || ''; }
@@ -115,6 +123,7 @@ $('#btnLogout').onclick = () => {
   localStorage.removeItem('bc_token');
   if (state.ws) { try { state.ws.close(); } catch {} state.ws = null; }
   state.me = null;
+  state.activeId = null;
   showAuth();
 };
 
@@ -284,6 +293,7 @@ async function openChat(id, keepScroll) {
   $('#chatId').textContent = 'ID: ' + f.id;
   setAvatar($('#chatAvatar'), f.id, f.nickname);
   updateChatHeader();
+  syncView();
 
   let data;
   try { data = await api('/api/messages?with=' + encodeURIComponent(id)); }
@@ -386,6 +396,11 @@ function autosize() {
 }
 
 $('#btnSend').onclick = sendMessage;
+$('#btnBack').onclick = () => {
+  state.activeId = null;
+  renderFriends();
+  syncView();
+};
 $('#msgInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
@@ -475,8 +490,18 @@ function forceLogout() {
   state.token = '';
   localStorage.removeItem('bc_token');
   state.me = null;
+  state.activeId = null;
   showAuth();
 }
+
+// 窗口在窄/宽屏间切换时刷新布局模式
+(function watchViewport() {
+  if (!window.matchMedia) return;
+  const mq = window.matchMedia('(max-width: 720px)');
+  const fn = () => syncView();
+  if (mq.addEventListener) mq.addEventListener('change', fn);
+  else if (mq.addListener) mq.addListener(fn);
+})();
 
 (async function init() {
   if (!state.token) { showAuth(); return; }

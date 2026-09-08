@@ -142,6 +142,11 @@ form .ipt { margin-bottom: 10px; }
   display: flex; align-items: center; gap: 10px; padding: 10px 16px;
   background: var(--panel); border-bottom: 1px solid var(--border);
 }
+.back-btn {
+  display: none; border: none; background: none; cursor: pointer;
+  font-size: 26px; line-height: 1; color: var(--text); padding: 0 2px;
+}
+.back-btn:active { opacity: .6; }
 .chat-head-meta { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .chat-head-meta b { font-size: 15px; }
 .online-tag { color: #2bb673; font-size: 12px; white-space: nowrap; }
@@ -152,11 +157,17 @@ form .ipt { margin-bottom: 10px; }
   background: #f4f6f9;
   display: flex; flex-direction: column; gap: 12px;
 }
-.msg-row { display: flex; align-items: flex-end; gap: 8px; }
+.msg-row { display: flex; align-items: flex-end; gap: 8px; width: 100%; }
 .msg-row.mine { flex-direction: row-reverse; }
+.msg-meta {
+  flex: 1 1 auto; min-width: 0; max-width: 100%;
+  display: flex; flex-direction: column; align-items: flex-end;
+}
+.msg-row.friend .msg-meta { align-items: flex-start; }
 .msg-bubble {
-  max-width: 62%; padding: 9px 13px; border-radius: 12px; line-height: 1.55;
-  word-break: break-word; white-space: pre-wrap; position: relative;
+  max-width: min(68%, 480px);
+  padding: 9px 13px; border-radius: 12px; line-height: 1.55;
+  word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap; position: relative;
 }
 .msg-row.friend .msg-bubble { background: var(--bubble-friend); border: 1px solid var(--border); border-bottom-left-radius: 3px; }
 .msg-row.mine .msg-bubble { background: var(--bubble-mine); color: #fff; border-bottom-right-radius: 3px; }
@@ -200,3 +211,27 @@ form .ipt { margin-bottom: 10px; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: #ccd3dc; border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- 窄屏 / 手机适配：列表与聊天全屏切换 ---------- */
+@media (max-width: 720px) {
+  .app { position: relative; overflow: hidden; }
+  .sidebar { width: 100%; min-width: 0; border-right: none; }
+  .chat { position: absolute; inset: 0; width: 100%; }
+  .back-btn { display: inline-flex; align-items: center; }
+  body.chat-open .sidebar { display: none; }
+  body:not(.chat-open) .chat { display: none; }
+
+  .msg-list { padding: 12px 10px; }
+  .msg-bubble { max-width: 80%; font-size: 15px; }
+  .msg-time { font-size: 10px; }
+
+  /* 输入与表单字号保持 16px，避免 iOS 聚焦自动放大 */
+  .chat-input-bar textarea, .ipt, .btn-primary { font-size: 16px; }
+  .chat-input-bar { padding: 8px 10px; }
+  .chat-input-bar textarea { min-height: 42px; max-height: 100px; }
+  .btn-send { height: 42px; width: 76px; }
+
+  .side-head { padding: 10px 12px; }
+  .search-row { padding: 8px 10px; }
+  .auth-card { box-shadow: none; }
+}
