@@ -96,7 +96,15 @@ form .ipt { margin-bottom: 10px; }
 .avatar-sm { width: 34px; height: 34px; font-size: 15px; }
 .avatar-lg { width: 64px; height: 64px; font-size: 26px; }
 
-.search-row { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.search-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.search-row .ipt { flex: 1; min-width: 0; }
+.btn-search {
+  flex: none; border: none; cursor: pointer; border-radius: 8px;
+  background: var(--accent); color: #fff; font-size: 14px;
+  padding: 8px 16px; letter-spacing: 2px;
+}
+.btn-search:hover { background: var(--accent-dark); }
+.btn-search:active { opacity: .85; }
 
 .sec-label {
   padding: 10px 14px 4px; color: var(--muted); font-size: 12px; letter-spacing: 1px;

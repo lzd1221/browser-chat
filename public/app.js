@@ -462,20 +462,19 @@ $('#msgInput').addEventListener('keydown', (e) => {
 });
 $('#msgInput').addEventListener('input', autosize);
 
-/* ---------- 搜索加好友 ---------- */
-let searchTimer = null;
-$('#searchInput').addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  const q = $('#searchInput').value.trim();
-  if (!q) return;
-  searchTimer = setTimeout(() => doSearch(q), 300);
-});
+/* ---------- 搜索加好友（点击按钮才搜索，输入过程不触发） ---------- */
+$('#btnSearch').onclick = () => doSearch($('#searchInput').value.trim());
 $('#searchInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); clearTimeout(searchTimer); doSearch($('#searchInput').value.trim()); }
+  // 中文输入法组合中不响应回车
+  if (e.isComposing || e.keyCode === 229) return;
+  if (e.key === 'Enter') { e.preventDefault(); doSearch($('#searchInput').value.trim()); }
 });
 
 async function doSearch(q) {
-  if (!q) return;
+  if (!q) {
+    toast('请先输入对方 ID');
+    return;
+  }
   const box = $('#searchResult');
   box.replaceChildren();
   const p = document.createElement('p');
