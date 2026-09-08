@@ -569,6 +569,31 @@ function forceLogout() {
   else if (mq.addListener) mq.addListener(fn);
 })();
 
+/* 移动端视口自适应：
+   - 页面(头部+输入栏)钉死在浏览器当前可见区域内，不随地址栏/键盘变化而溢出
+   - 弹键盘时高度收缩，输入框自动停在键盘上方 */
+function fitMobileViewport() {
+  const app = $('#appView');
+  if (!app) return;
+  const narrow = window.matchMedia('(max-width: 900px)').matches;
+  if (!narrow) { app.style.height = ''; return; }
+  const vv = window.visualViewport;
+  const h = vv ? vv.height : window.innerHeight;
+  app.style.height = Math.max(Math.round(h), 240) + 'px';
+}
+(function watchViewportHeight() {
+  fitMobileViewport();
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitMobileViewport);
+    window.visualViewport.addEventListener('scroll', fitMobileViewport);
+  }
+  window.addEventListener('resize', fitMobileViewport);
+  window.addEventListener('orientationchange', () => setTimeout(fitMobileViewport, 200));
+  // 键盘弹起/收起时重新适配（部分浏览器需要延迟等键盘动画完成）
+  document.addEventListener('focusin', (e) => { if (e.target && e.target.id === 'msgInput') setTimeout(fitMobileViewport, 300); });
+  document.addEventListener('focusout', (e) => { if (e.target && e.target.id === 'msgInput') setTimeout(fitMobileViewport, 150); });
+})();
+
 (async function init() {
   if (!state.token) { showAuth(); return; }
   try {

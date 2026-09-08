@@ -69,6 +69,8 @@ form .ipt { margin-bottom: 10px; }
 
 /* ---------- 主布局 ---------- */
 .app { display: flex; height: 100vh; }
+/* 使用动态视口高度：移动端地址栏收起/展开时自动贴合可见区域 */
+@supports (height: 100dvh) { .app { height: 100dvh; } }
 .sidebar {
   width: 288px; min-width: 288px; background: var(--panel);
   border-right: 1px solid var(--border); display: flex; flex-direction: column;
@@ -225,7 +227,9 @@ form .ipt { margin-bottom: 10px; }
 
 /* ---------- 窄屏 / 手机适配：列表与聊天全屏切换（<=900px） ---------- */
 @media (max-width: 900px) {
+  html, body { overflow: hidden; overscroll-behavior: none; }
   .app { position: relative; overflow: hidden; }
+  .friend-list, .msg-list { -webkit-overflow-scrolling: touch; }
   .sidebar { width: 100%; min-width: 0; border-right: none; }
   .chat { position: absolute; inset: 0; width: 100%; }
   .back-btn { display: inline-flex; align-items: center; }
