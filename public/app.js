@@ -181,7 +181,39 @@ function handleWs(msg) {
       // 正在与该好友聊天：拉取最新（服务端顺带标记已读）
       openChat(state.activeId, true);
     }
+  } else if (msg.type === 'read') {
+    // 对方已读回执：把 <= upToAt 的自己发出的消息标为已读
+    if (msg.by && msg.upToAt && state.activeId === msg.by) markMyMessagesRead(msg.upToAt);
   }
+}
+
+/* 将当前聊天里自己发出、时间 <= upToAt 的消息标记为"已读" */
+function markMyMessagesRead(upToAt) {
+  document.querySelectorAll('#msgList .msg-time[data-at][data-role="mine"]').forEach(el => {
+    if (el.dataset.seen === '1') return;
+    const at = Number(el.dataset.at);
+    if (at && at <= upToAt) {
+      el.dataset.seen = '1';
+      el.classList.add('seen');
+      el.textContent = fmtTime(at) + ' · 已读';
+    }
+  });
+}
+
+function timeLabel(m, read) {
+  const t = document.createElement('div');
+  t.className = 'msg-time';
+  if (m) {
+    t.textContent = fmtTime(m.at);
+    if (read !== undefined) {
+      t.dataset.at = m.at;
+      t.dataset.role = 'mine';
+      t.dataset.seen = read ? '1' : '0';
+      if (read) t.classList.add('seen');
+      t.textContent += ' · ' + (read ? '已读' : '未读');
+    }
+  }
+  return t;
 }
 
 /* ---------- 联系人 / 好友 ---------- */
@@ -340,12 +372,7 @@ function renderMessages(messages, f) {
       bub.className = 'msg-bubble';
       bub.textContent = m.text;
       meta.append(bub);
-      if (isLast) {
-        const t = document.createElement('div');
-        t.className = 'msg-time';
-        t.textContent = fmtTime(m.at);
-        meta.append(t);
-      }
+      if (isLast) meta.append(timeLabel(m, run.mine ? m.read : undefined));
       row.append(meta);
       frag.append(row);
     });
@@ -377,10 +404,7 @@ async function sendMessage() {
     const bub = document.createElement('div');
     bub.className = 'msg-bubble';
     bub.textContent = text;
-    const t = document.createElement('div');
-    t.className = 'msg-time';
-    t.textContent = fmtTime(data.msg.at);
-    meta.append(bub, t);
+    meta.append(bub, timeLabel({ at: data.msg.at }, false));
     row.append(meta);
     box.append(row);
     scrollToBottom(true);

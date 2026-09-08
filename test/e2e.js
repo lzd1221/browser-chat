@@ -83,7 +83,31 @@ function waitWsMsg(ws, type, timeout = 4000) {
   r = await post('/api/messages', { to: 'ccc003', text: 'hi' }, ta);
   ok('非好友发消息被拒(403)', r.status === 403, r);
 
-  console.log('== 4. 非法/边界 ==');
+  console.log('== 5. 已读回执 ==');
+  const wsB = new (require('ws'))(WS + '/ws?token=' + tb);
+  await new Promise((res, rej) => { wsB.on('open', res); wsB.on('error', rej); });
+  // A 给 B 发新消息
+  const pMsgB = waitWsMsg(wsB, 'msg');
+  r = await post('/api/messages', { to: 'bbb002', text: '已读回执测试消息' }, ta);
+  ok('A 发送新消息成功', r.status === 200, r);
+  await pMsgB;
+  // 拉取 A 视角：此时 B 尚未读，read 应为 false
+  let mA = (await api('/api/messages?with=bbb002', {}, ta)).data.messages;
+  const unreadMsg = mA.find(m => m.text === '已读回执测试消息');
+  ok('B 未读时 A 侧 read=false', unreadMsg && unreadMsg.read === false, unreadMsg);
+  // B 打开聊天（GET messages 触发标记已读）
+  const pReadA = waitWsMsg(wsA, 'read');
+  r = await api('/api/messages?with=aaa001', {}, tb);
+  ok('B 拉取聊天记录成功', r.status === 200, r);
+  const readEv = await pReadA;
+  ok('B 读取后 A 实时收到已读回执', readEv.by === 'bbb002' && readEv.upToAt >= unreadMsg.at, readEv);
+  // A 再拉：该消息 read 应为 true
+  mA = (await api('/api/messages?with=bbb002', {}, ta)).data.messages;
+  const readMsg = mA.find(m => m.text === '已读回执测试消息');
+  ok('B 已读后 A 侧 read=true', readMsg && readMsg.read === true, readMsg);
+  wsB.close();
+
+  console.log('== 6. 非法/边界 ==');
   r = await api('/api/search?q=abc', {}, 'bad-token');
   ok('无效 token 访问被拒(401)', r.status === 401, r);
 

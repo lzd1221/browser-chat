@@ -247,9 +247,13 @@ function appendMessage(fromId, toId, text) {
 function markRead(meId, otherId) {
   const pk = pairKey(meId, otherId);
   const arr = db.messages[pk] || [];
-  let changed = false;
-  for (const m of arr) if (m.to === meId && !m.read) { m.read = true; changed = true; }
-  if (changed) scheduleSave();
+  let changed = false, upToAt = 0;
+  for (const m of arr) if (m.to === meId && !m.read) { m.read = true; changed = true; if (m.at > upToAt) upToAt = m.at; }
+  if (changed) {
+    scheduleSave();
+    // 实时通知对方：你的消息已被我读到（<= upToAt 的全部视为已读）
+    wsSend(otherId, { type: 'read', by: meId, upToAt });
+  }
   return changed;
 }
 
@@ -359,7 +363,7 @@ function api(req, res, pathname) {
     if (!withId || !(me.friends || []).includes(withId)) return sendJson(res, 403, { error: '仅好友可聊天' });
     markRead(me.id, withId);
     const arr = db.messages[pairKey(me.id, withId)] || [];
-    return sendJson(res, 200, { messages: arr.slice(-LOAD_LIMIT).map(m => ({ from: m.from, to: m.to, text: m.text, at: m.at })) });
+    return sendJson(res, 200, { messages: arr.slice(-LOAD_LIMIT).map(m => ({ from: m.from, to: m.to, text: m.text, at: m.at, read: !!m.read })) });
   }
 
   /* 发送消息 */
