@@ -433,6 +433,8 @@ $('#btnBack').onclick = () => {
   syncView();
 };
 $('#msgInput').addEventListener('keydown', (e) => {
+  // 中文输入法选字回车(isComposing/229)不应触发发送
+  if (e.isComposing || e.keyCode === 229) return;
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 $('#msgInput').addEventListener('input', autosize);
