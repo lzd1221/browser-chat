@@ -228,7 +228,8 @@ form .ipt { margin-bottom: 10px; }
 /* ---------- 窄屏 / 手机适配：列表与聊天全屏切换（<=900px） ---------- */
 @media (max-width: 900px) {
   html, body { overflow: hidden; overscroll-behavior: none; }
-  .app { position: relative; overflow: hidden; }
+  /* 整个应用钉死在浏览器可见区域顶部：不会被键盘弹起引发的滚动推走 */
+  .app { position: fixed; top: 0; left: 0; right: 0; overflow: hidden; }
   .friend-list, .msg-list { -webkit-overflow-scrolling: touch; }
   .sidebar { width: 100%; min-width: 0; border-right: none; }
   .chat { position: absolute; inset: 0; width: 100%; }

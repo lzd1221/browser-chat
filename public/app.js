@@ -571,7 +571,8 @@ function forceLogout() {
 
 /* 移动端视口自适应：
    - 页面(头部+输入栏)钉死在浏览器当前可见区域内，不随地址栏/键盘变化而溢出
-   - 弹键盘时高度收缩，输入框自动停在键盘上方 */
+   - 弹键盘时高度收缩，输入框自动停在键盘上方
+   - 若 iOS 为显示输入框擅自滚动页面，立刻拉回顶部，避免聊天记录被滚走变空白 */
 function fitMobileViewport() {
   const app = $('#appView');
   if (!app) return;
@@ -580,18 +581,30 @@ function fitMobileViewport() {
   const vv = window.visualViewport;
   const h = vv ? vv.height : window.innerHeight;
   app.style.height = Math.max(Math.round(h), 240) + 'px';
+  // 任何滚动偏移都会把上方内容推出屏幕 → 强制归零
+  if (window.scrollY > 0) { try { window.scrollTo(0, 0); } catch {} }
+  const de = document.documentElement, b = document.body;
+  if (de && de.scrollTop > 0) de.scrollTop = 0;
+  if (b && b.scrollTop > 0) b.scrollTop = 0;
+  if (vv && vv.offsetTop !== 0) { app.style.transform = 'translateY(' + (-(vv.offsetTop || 0)) + 'px)'; }
+  else if (app.style.transform) { app.style.transform = ''; }
 }
 (function watchViewportHeight() {
   fitMobileViewport();
+  const onVv = () => { fitMobileViewport(); };
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', fitMobileViewport);
-    window.visualViewport.addEventListener('scroll', fitMobileViewport);
+    window.visualViewport.addEventListener('resize', onVv);
+    window.visualViewport.addEventListener('scroll', onVv);
   }
-  window.addEventListener('resize', fitMobileViewport);
-  window.addEventListener('orientationchange', () => setTimeout(fitMobileViewport, 200));
-  // 键盘弹起/收起时重新适配（部分浏览器需要延迟等键盘动画完成）
-  document.addEventListener('focusin', (e) => { if (e.target && e.target.id === 'msgInput') setTimeout(fitMobileViewport, 300); });
-  document.addEventListener('focusout', (e) => { if (e.target && e.target.id === 'msgInput') setTimeout(fitMobileViewport, 150); });
+  window.addEventListener('resize', onVv);
+  window.addEventListener('orientationchange', () => setTimeout(onVv, 200));
+  // 键盘弹起/收起：立即适配一次，动画结束后再校正一次
+  document.addEventListener('focusin', (e) => {
+    if (e.target && e.target.id === 'msgInput') { fitMobileViewport(); setTimeout(fitMobileViewport, 350); }
+  });
+  document.addEventListener('focusout', (e) => {
+    if (e.target && e.target.id === 'msgInput') { setTimeout(fitMobileViewport, 100); setTimeout(fitMobileViewport, 400); }
+  });
 })();
 
 (async function init() {
